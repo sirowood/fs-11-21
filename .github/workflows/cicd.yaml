@@ -1,0 +1,53 @@
+Name: CI/CD
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  ci/cd:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup npm
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Install packages
+        run: npm install
+      - uses: actions/checkout@v2
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
+          heroku_email: ${{secrets.HEROKU_EMAIL_ADDRESS}}
+          healthcheck: ${{secrets.HEALTHCHECK_ADDRESS}}
+          checkstring: 'ok'
+          delay: 5
+          rollbackonhealthcheckfailed: true
+      - uses: actions/checkout@v2
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.33.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
+      - name: Slack Notification - Success
+        if: always() && job.status == 'success'
+        uses: 8398a7/action-slack@v3.12.0
+        with:
+          channel: '#code'
+          author_name: 'Xuefeng Wu'
+          status: ${{ job.status }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Slack Notification - Failure
+        if: always() && job.status != 'success'
+        uses: 8398a7/action-slack@v3.12.0
+        with:
+          channel: '#code'
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

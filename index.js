@@ -107,6 +107,10 @@ app.get('/info', (request, response) => {
     })
 })
 
+app.get('/health', (request, response) => {
+  response.send('ok')
+})
+
 app.use(unknownEndpoint)
 app.use(errorHandler)
 
