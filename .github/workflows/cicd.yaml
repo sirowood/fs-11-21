@@ -13,9 +13,7 @@ jobs:
       - name: Setup npm
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
-      - name: Install packages
-        run: npm install
+          node-version: '16.x'
       - uses: actions/checkout@v2
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.12.12
