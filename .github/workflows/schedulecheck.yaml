@@ -1,0 +1,14 @@
+name: Scheduled Health Check
+
+on:
+  schedule:
+    - cron: '0 5 * * 1' # Every Monday 05:00
+
+jobs:
+  schedule_check:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check the deployed service URL
+        uses: jtalk/url-health-check-action@v2
+        with:
+          url: ${{secrets.HEALTHCHECK_ADDRESS}}
